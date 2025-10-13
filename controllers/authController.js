@@ -28,18 +28,30 @@ export const register = async (req, res) => {
 
 // Login
 export const login = async (req, res) => {
-  const { mobile_num, password } = req.body;
+  const { mobile, password } = req.body;
+  if (!mobile || !password) return res.status(400).json({ error: "Mobile & password required" });
+
   try {
-    const userRes = await pool.query('SELECT * FROM users WHERE mobile_num=$1', [mobile_num]);
-    if (!userRes.rows.length) return res.status(400).json({ error: 'Invalid mobile number or password' });
+    const userRes = await pool.query(
+      "SELECT id, password, client_id, first_name FROM users WHERE mobile_num=$1 AND is_active=true",
+      [mobile]
+    );
+
+    if (!userRes.rows.length) return res.status(401).json({ error: "Invalid credentials" });
 
     const user = userRes.rows[0];
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) return res.status(400).json({ error: 'Invalid mobile number or password' });
+    const match = await bcrypt.compare(password, user.password);
+    if (!match) return res.status(401).json({ error: "Invalid credentials" });
 
-    const token = jwt.sign({ id: user.id, role: user.role, client_id: user.client_id }, JWT_SECRET, { expiresIn: JWT_EXPIRE });
-    res.json({ token, user: { id: user.id, first_name: user.first_name, last_name: user.last_name, mobile_num: user.mobile_num, role: user.role } });
+    const token = jwt.sign(
+      { user_id: user.id, client_id: user.client_id, first_name: user.first_name },
+      JWT_SECRET,
+      { expiresIn: TOKEN_EXPIRY }
+    );
+
+    res.json({ token });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error(err);
+    res.status(500).json({ error: "Server error" });
   }
 };

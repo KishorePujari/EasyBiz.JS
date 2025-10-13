@@ -6,6 +6,7 @@ import dotenv from 'dotenv';
 
 
 import customersRoutes from './routes/customers.js';
+import clientsRoutes from './routes/clients.js';
 import productsRoutes from './routes/products.js';
 import variantsRoutes from './routes/productVariants.js';
 import ordersRoutes from './routes/orders.js';
@@ -29,6 +30,7 @@ app.use(express.json({ limit: '5mb' }));
 
 // API routes
 app.use('/api/auth', authRoutes);
+app.use('/api/clients', authMiddleware,clientsRoutes);
 app.use('/api/customers', authMiddleware,customersRoutes);
 app.use('/api/products', authMiddleware, productsRoutes);
 app.use('/api/variants', authMiddleware, variantsRoutes);
