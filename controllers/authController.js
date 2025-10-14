@@ -1,6 +1,5 @@
 import pool from '../db/pool.js';
 import bcrypt from 'bcryptjs';
-import { json } from 'body-parser';
 import jwt from 'jsonwebtoken';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'easybiz_secret';
@@ -29,9 +28,6 @@ export const register = async (req, res) => {
 
 // Login
 export const login = async (req, res) => {
-
-  return res.status(200).result("Done");
-
   const { mobile, password } = req.body;
   if (!mobile || !password) return res.status(400).json({ error: "Mobile & password required" });
 
