@@ -30,7 +30,7 @@ export const register = async (req, res) => {
 // Login
 export const login = async (req, res) => {
 
-  return res.status(401).json(json.toString(req));
+  return res.status(401).json(JSON.stringify(req));
 
   const { mobile, password } = req.body;
   if (!mobile || !password) return res.status(400).json({ error: "Mobile & password required" });
