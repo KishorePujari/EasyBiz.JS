@@ -28,30 +28,53 @@ export const register = async (req, res) => {
 
 // Login
 export const login = async (req, res) => {
-  const { mobile, password } = req.body;
-  if (!mobile || !password) return res.status(400).json({ error: "Mobile & password required" });
-
   try {
-    const userRes = await pool.query(
-      "SELECT id, password, client_id, first_name FROM users WHERE mobile_num=$1 AND is_active=true",
-      [mobile]
-    );
+    // ✅ Body-parser's json() already parses JSON body
+    const { mobile_num, password } = req.body;
 
-    if (!userRes.rows.length) return res.status(401).json({ error: "Invalid credentials" });
+    if (!mobile_num || !password) {
+      return res.status(400).json({ message: "Mobile number and password are required" });
+    }
 
-    const user = userRes.rows[0];
-    const match = await bcrypt.compare(password, user.password);
-    if (!match) return res.status(401).json({ error: "Invalid credentials" });
+    // ✅ Check user exists
+    const result = await pool.query("SELECT * FROM users WHERE mobile_num = $1", [mobile_num]);
+    const user = result.rows[0];
 
+    if (!user) {
+      return res.status(401).json({ message: "Invalid credentials" });
+    }
+
+    // ✅ Compare password
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(401).json({ message: "Invalid credentials" });
+    }
+
+    // ✅ Generate JWT
     const token = jwt.sign(
-      { user_id: user.id, client_id: user.client_id, first_name: user.first_name },
-      JWT_SECRET,
-      { expiresIn: TOKEN_EXPIRY }
+      {
+        id: user.id,
+        client_id: user.client_id,
+        role: user.role,
+        name: `${user.first_name} ${user.last_name}`,
+      },
+      process.env.JWT_SECRET || "supersecret",
+      { expiresIn: "8h" }
     );
 
-    res.json({ token });
+    // ✅ Send response
+    res.json({
+      message: "Login successful",
+      token,
+      user: {
+        id: user.id,
+        name: `${user.first_name} ${user.last_name}`,
+        role: user.role,
+        client_id: user.client_id,
+      },
+    });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Server error" });
+    console.error("Login error:", err.message);
+    res.status(500).json({ message: "Server error" });
   }
 };
