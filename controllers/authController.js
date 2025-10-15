@@ -7,17 +7,17 @@ const JWT_EXPIRE = '8h'; // token expiry
 
 // Register a new user (for admin setup)
 export const register = async (req, res) => {
-  const { first_name, last_name, mobile_num, password, role, client_id } = req.body;
+  const { first_name, last_name, mobile, password, role, client_id } = req.body;
   try {
     // Check if mobile number exists
-    const userExist = await pool.query('SELECT * FROM users WHERE mobile_num=$1', [mobile_num]);
+    const userExist = await pool.query('SELECT * FROM users WHERE mobile_num=$1', [mobile]);
     if (userExist.rows.length) return res.status(400).json({ error: 'Mobile number already exists' });
 
     const hashedPassword = await bcrypt.hash(password, 10);
     const result = await pool.query(
       `INSERT INTO users (first_name, last_name, mobile_num, password, role, client_id)
        VALUES($1,$2,$3,$4,$5,$6) RETURNING id, first_name, last_name, mobile_num, role`,
-      [first_name, last_name, mobile_num, hashedPassword, role, client_id]
+      [first_name, last_name, mobile, hashedPassword, role, client_id]
     );
 
     res.json(result.rows[0]);
@@ -30,14 +30,14 @@ export const register = async (req, res) => {
 export const login = async (req, res) => {
   try {
     // ✅ Body-parser's json() already parses JSON body
-    const { mobile_num, password } = req.body;
+    const { mobile, password } = req.body;
 
-    if (!mobile_num || !password) {
-      return res.status(400).json({ message: "Mobile number and password are required" });
+    if (!mobile || !password) {
+      return res.status(400).json({ message: "Mobile number and password are required", data: JSON.stringify(req.body) });
     }
 
     // ✅ Check user exists
-    const result = await pool.query("SELECT * FROM users WHERE mobile_num = $1", [mobile_num]);
+    const result = await pool.query("SELECT * FROM users WHERE mobile_num = $1", [mobile]);
     const user = result.rows[0];
 
     if (!user) {
