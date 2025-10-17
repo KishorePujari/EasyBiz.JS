@@ -8,3 +8,12 @@ Content-Type: application/json
 
 ######
 GET https://easybizjs-production.up.railway.app/health
+
+#####
+POST http://localhost:3000/api/auth/login
+Content-Type: application/json
+
+{
+  "mobile": "9886798761",
+  "password": "9886798761"
+}

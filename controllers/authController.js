@@ -1,4 +1,4 @@
-import pool from '../db/pool.js';
+import { getPool } from '../db/pool.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
@@ -29,22 +29,24 @@ export const register = async (req, res) => {
 // Login
 export const login = async (req, res) => {
   try {
-    // ✅ Body-parser's json() already parses JSON body
+    const pool = await getPool();
+
+    // Body-parser's json() already parses JSON body
     const { mobile, password } = req.body;
 
     if (!mobile || !password) {
-      return res.status(400).json({ message: "Mobile number and password are required", data: JSON.stringify(req.body) });
+      return res.status(400).json({ message: "Mobile number and password are required", data: ""});
     }
+    // Check user exists
+    const result = await pool.query('SELECT * FROM users WHERE mobile_num = $1', [mobile]);
 
-    // ✅ Check user exists
-    const result = await pool.query("SELECT * FROM users WHERE mobile_num = $1", [mobile]);
     const user = result.rows[0];
 
     if (!user) {
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
-    // ✅ Compare password
+    // compare password
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.status(401).json({ message: "Invalid credentials" });

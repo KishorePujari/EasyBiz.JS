@@ -22,14 +22,15 @@ import aiLogsRoutes from './routes/aiQueryLogs.js';
 import authRoutes from './routes/auth.js';
 import { authMiddleware, roleMiddleware } from './middleware/authMiddleware.js';
 
-dotenv.config();
+// dotenv.config();
+
 
 const app = express();
 
 app.use(cors());
 app.use(express.json({ limit: '5mb' }));
 
-await createFirstUser();
+// await createFirstUser();
 
 // API routes
 app.use('/api/auth', authRoutes);
