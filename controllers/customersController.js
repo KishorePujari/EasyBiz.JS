@@ -47,3 +47,13 @@ export const deleteCustomer = async (req, res) => {
     res.json({ success: true });
   } catch (err) { res.status(500).json({ error: err.message }); }
 };
+
+
+export const getCustomerByMobile = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const result = await pool.query('SELECT * FROM customers WHERE phone = $1', [id]);
+    if (!result.rows.length) return res.status(404).json({ error: 'Customer not found' });
+    res.json(result.rows[0]);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+};

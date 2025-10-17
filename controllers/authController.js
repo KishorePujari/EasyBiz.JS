@@ -1,6 +1,7 @@
 import { getPool } from '../db/pool.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import { detectPlatform } from "../utils/detectPlatform.js";
 
 const JWT_SECRET = process.env.JWT_SECRET || 'easybiz_secret';
 const JWT_EXPIRE = '8h'; // token expiry
@@ -35,7 +36,7 @@ export const login = async (req, res) => {
     const { mobile, password } = req.body;
 
     if (!mobile || !password) {
-      return res.status(400).json({ message: "Mobile number and password are required", data: ""});
+      return res.status(400).json({ message: "Mobile number and password are required", data: "" });
     }
     // Check user exists
     const result = await pool.query('SELECT * FROM users WHERE mobile_num = $1', [mobile]);
@@ -64,17 +65,39 @@ export const login = async (req, res) => {
       { expiresIn: "8h" }
     );
 
-    // ✅ Send response
-    res.json({
-      message: "Login successful",
-      token,
-      user: {
-        id: user.id,
-        name: `${user.first_name} ${user.last_name}`,
-        role: user.role,
-        client_id: user.client_id,
-      },
-    });
+    const platform = detectPlatform(req.headers["user-agent"]);
+
+    if (platform === "mobile") {
+      console.log("Login from mobile:", req.headers["user-agent"]);
+      // Send token in response for mobile apps
+      return res.json({
+        message: "Login successful (mobile)",
+        token,
+        user: {
+          id: user.id,
+          name: `${user.first_name} ${user.last_name}`,
+          role: user.role,
+        },
+      });
+    } else {
+      console.log("Login from web:", req.headers["user-agent"]);
+      // Send cookie for browsers
+      res.cookie("token", token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+        maxAge: 24 * 60 * 60 * 1000,
+      });
+
+      return res.json({
+        message: "Login successful (web)",
+        user: {
+          id: user.id,
+          name: `${user.first_name} ${user.last_name}`,
+          role: user.role,
+        },
+      });
+    }
   } catch (err) {
     console.error("Login error:", err.message);
     res.status(500).json({ message: "Server error" });
