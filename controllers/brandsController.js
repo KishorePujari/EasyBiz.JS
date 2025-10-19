@@ -23,7 +23,7 @@ export const createBrand = async (req, res) => {
 
 // GET /api/brands - Read All Brands
 export const getBrands = async (req, res) => {
-    if (!req.user || !req.user.features.some(f => ['VIEW_BRANDS', 'MANAGE_BRANDS'].includes(f))) return res.status(403).json({ message: "Forbidden." });
+    if (!req.user || !req.user.features.some(f => ['VIEW_BRANDS'].includes(f))) return res.status(403).json({ message: "Forbidden." });
     try {
         const pool = await getPool();
         const query = `SELECT id, name, description, is_active FROM brands ORDER BY name ASC;`;

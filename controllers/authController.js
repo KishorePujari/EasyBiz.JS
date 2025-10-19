@@ -179,6 +179,7 @@ export const login = async (req, res) => {
         user: userResponse,
       });
     } else {
+      
       console.log("Login from web:", req.headers["user-agent"]);
       res.cookie("token", token, {
         httpOnly: true,
