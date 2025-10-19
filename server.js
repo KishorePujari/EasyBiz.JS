@@ -5,19 +5,21 @@ import dotenv from 'dotenv';
 import pkg from 'pg';
 import bcrypt from 'bcrypt';
 
-
-import customersRoutes from './routes/customers.js';
+import brandsRoutes from './routes/brands.js';
+import categoriesRoutes from './routes/categories.js';
 import clientsRoutes from './routes/clients.js';
-import productsRoutes from './routes/products.js';
-import variantsRoutes from './routes/productVariants.js';
+import customersRoutes from './routes/customers.js';
+import employeesRoutes from './routes/employees.js';
+import expensesRoutes from './routes/expenses.js';
+import inventoryRoutes from './routes/inventory.js';
 import ordersRoutes from './routes/orders.js';
 import paymentsRoutes from './routes/payments.js';
+import plansRoutes from './routes/plans.js';
+import productsRoutes from './routes/products.js';
 import storesRoutes from './routes/stores.js';
 import suppliersRoutes from './routes/suppliers.js';
-import employeesRoutes from './routes/employees.js';
-import inventoryRoutes from './routes/inventory.js';
-import expensesRoutes from './routes/expenses.js';
 import transactionsRoutes from './routes/transactions.js';
+import variantsRoutes from './routes/productVariants.js';
 import aiLogsRoutes from './routes/aiQueryLogs.js';
 import authRoutes from './routes/auth.js';
 import { authMiddleware, roleMiddleware } from './middleware/authMiddleware.js';
@@ -34,12 +36,15 @@ app.use(express.json({ limit: '5mb' }));
 
 // API routes
 app.use('/api/auth', authRoutes);
+app.use('/api/brands', authMiddleware, brandsRoutes);
+app.use('/api/categories', authMiddleware, categoriesRoutes);
 app.use('/api/clients', authMiddleware, clientsRoutes);
 app.use('/api/customers', authMiddleware, customersRoutes);
 app.use('/api/products', authMiddleware, productsRoutes);
 app.use('/api/variants', authMiddleware, variantsRoutes);
 app.use('/api/orders', authMiddleware, ordersRoutes);
 app.use('/api/payments', authMiddleware, paymentsRoutes);
+app.use('/api/plans', authMiddleware, plansRoutes);
 app.use('/api/stores', authMiddleware, storesRoutes);
 app.use('/api/suppliers', authMiddleware, suppliersRoutes);
 app.use('/api/employees', authMiddleware, employeesRoutes);

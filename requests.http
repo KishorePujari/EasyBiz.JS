@@ -1,3 +1,19 @@
+######
+GET http://localhost:3000/health
+
+#####
+POST http://localhost:3000/api/auth/login
+Content-Type: application/json
+
+{
+  "mobile": "9886798761",
+  "password": "9886798761"
+}
+
+####
+POST http://localhost:3000/api/products/search&query=milk&category=paint
+
+
 POST https://easybizjs-production.up.railway.app/api/auth/login
 Content-Type: application/json
 
@@ -9,11 +25,4 @@ Content-Type: application/json
 ######
 GET https://easybizjs-production.up.railway.app/health
 
-#####
-POST http://localhost:3000/api/auth/login
-Content-Type: application/json
 
-{
-  "mobile": "9886798761",
-  "password": "9886798761"
-}
