@@ -43,7 +43,7 @@ const fetchUserRolePermissions = async (pool, role) => {
         r.user_role = $1  -- Filter using the role name passed as $1
   `;
   const result = await pool.query(query, [role]);
-  return result.rows.map(row => row.feature_name);
+  return result.rows.map(row => row.functionality_key);
 };
 
 // NEW: Function to fetch user-specific overrides
@@ -156,7 +156,7 @@ export const login = async (req, res) => {
         name: `${user.first_name} ${user.last_name}`,
         features: userPermissions,
       },
-      process.env.JWT_SECRET || "supersecret",
+      JWT_SECRET || "supersecret",
       { expiresIn: "8h" }
     );
 
@@ -171,28 +171,29 @@ export const login = async (req, res) => {
       permissions: userPermissions, // FINAL list sent to client-side
     };
 
-    if (platform === "mobile") {
-      console.log("Login from mobile:", req.headers["user-agent"]);
-      return res.json({
-        message: "Login successful (mobile)",
-        token,
-        user: userResponse,
-      });
-    } else {
+    // if (platform === "mobile") {
+    //   console.log("Login from mobile:", req.headers["user-agent"]);
+    //   return res.json({
+    //     message: "Login successful (mobile)",
+    //     token,
+    //     user: userResponse,
+    //   });
+    // } else {
       
-      console.log("Login from web:", req.headers["user-agent"]);
-      res.cookie("token", token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "strict",
-        maxAge: 24 * 60 * 60 * 1000,
-      });
+      // console.log("Login from web:", req.headers["user-agent"]);
+      // res.cookie("token", token, {
+      //   httpOnly: true,
+      //   secure: false, //KKN process.env.NODE_ENV === "production",
+      //   sameSite: "lax",// KKN"strict",
+      //   maxAge: 24 * 60 * 60 * 1000,
+      // });
 
-      return res.json({
-        message: "Login successful (web)",
-        user: userResponse,
-      });
-    }
+    return res.json({
+      message: "Login successful (web)",
+      token: token,
+      user: userResponse,
+    });
+    // }
   } catch (err) {
     console.error("Login error:", err.message);
     res.status(500).json({ message: "Server error" });

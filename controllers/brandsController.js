@@ -1,3 +1,4 @@
+import { getPool } from '../db/pool.js';
 // POST /api/brands - Create Brand
 export const createBrand = async (req, res) => {
     if (!req.user || !req.user.features.includes('MANAGE_BRANDS')) return res.status(403).json({ message: "Forbidden." });

@@ -4,6 +4,8 @@ import dotenv from 'dotenv';
 
 import pkg from 'pg';
 import bcrypt from 'bcrypt';
+import cookieParser from 'cookie-parser';
+import listEndpoints from 'express-list-endpoints';
 
 import brandsRoutes from './routes/brands.js';
 import categoriesRoutes from './routes/categories.js';
@@ -28,8 +30,30 @@ import { authMiddleware, roleMiddleware } from './middleware/authMiddleware.js';
 
 
 const app = express();
+const corsOptions = {
+    // 1. Allows requests from any origin ('*')
+    // We use a function instead of '*' because setting origin: '*' 
+    // prevents the 'credentials: true' flag from working.
+    origin: (origin, callback) => {
+        // Allows requests with no origin (like mobile apps or file://) 
+        // and all other origins.
+        return callback(null, true);
+    },
+    
+    // 2. MUST be set to true to allow cookies (your 'token' cookie)
+    // and Authorization headers to be sent in cross-origin requests.
+    credentials: true, 
+    
+    // 3. Allows all common methods
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    
+    // 4. Sets a success status for preflight OPTIONS requests
+    optionsSuccessStatus: 204
+};
 
-app.use(cors());
+app.use(cors(corsOptions));
+app.use(cookieParser());
+
 app.use(express.json({ limit: '5mb' }));
 
 // await createFirstUser();
@@ -54,6 +78,17 @@ app.use('/api/transactions', authMiddleware, transactionsRoutes);
 app.use('/api/ai-logs', authMiddleware, aiLogsRoutes);
 
 app.get('/health', (req, res) => res.json({ status: 'ok' }));
+
+
+// --- Get and Display Routes ---
+const endpoints = listEndpoints(app);
+
+console.log("--- All Registered Endpoints (via Library) ---");
+console.table(endpoints.map(e => ({
+    path: e.path,
+    methods: e.methods.join(', ')
+})));
+console.log("------------------------------------------");
 
 const PORT = process.env.PORT || 3000;
 

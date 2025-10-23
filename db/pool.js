@@ -17,11 +17,7 @@ async function createPool()
 {
   // Validate environment variables
   const requiredEnvVars = [
-    "DB_USER",
-    "DB_PASSWORD",
-    "DB_HOST",
-    "DB_PORT",
-    "DB_NAME"
+    "DATABASE_URL"
   ];
 
   requiredEnvVars.forEach((key) => {
